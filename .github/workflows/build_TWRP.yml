@@ -156,6 +156,44 @@ jobs:
       run: |
         cd android-recovery
         source build/envsetup.sh
+        # 2. Apply the patch AFTER the common tree is cloned
+        echo "Applying haptics brightness patch..."
+        RET=0
+        
+        # Define possible patch locations (relative to android-recovery root)
+        # Path 1: Inside the common device tree
+        PATCH_PATH_COMMON="device/transsion/mt6835-common/patches/0001-haptics-use-brightness-200ms.patch"
+        # Path 2: Inside your main device tree
+        PATCH_PATH_DEVICE="${{ github.event.inputs.DEVICE_PATH }}/patches/0001-haptics-use-brightness-200ms.patch"
+        
+        PATCH_TO_APPLY=""
+
+        if [ -f "$PATCH_PATH_COMMON" ]; then
+            echo "Found patch in common tree: $PATCH_PATH_COMMON"
+            PATCH_TO_APPLY="$PATCH_PATH_COMMON"
+        elif [ -f "$PATCH_PATH_DEVICE" ]; then
+            echo "Found patch in device tree: $PATCH_PATH_DEVICE"
+            PATCH_TO_APPLY="$PATCH_PATH_DEVICE"
+        else
+            echo "ERROR: Haptics patch file not found in common or device tree."
+            echo "Looked for: $PATCH_PATH_COMMON"
+            echo "Looked for: $PATCH_PATH_DEVICE"
+            RET=1 # Set error code
+        fi
+        
+        if [ $RET -eq 0 ]; then
+            cd bootable/recovery
+            # Apply the patch using a relative path from bootable/recovery
+            git apply "../../$PATCH_TO_APPLY" > /dev/null 2>&1 || RET=$?
+            cd ../../ # Go back to android-recovery root
+        fi
+
+        if [ $RET -ne 0 ];then
+            echo "ERROR: Haptics patch failed to apply! Check logs."
+            # We will continue the build anyway, but log the error
+        else
+            echo "OK: Haptics patch applied successfully."
+        fi
         export ALLOW_MISSING_DEPENDENCIES=true
         lunch ${{ env.DEVICE_MAKEFILE }}-eng && make clean && make ${{ github.event.inputs.BUILD_TARGET }}image -j$(nproc --all)
         echo "Done building your ${{ github.event.inputs.BUILD_TARGET }}.img"
