@@ -184,7 +184,7 @@ jobs:
         if [ $RET -eq 0 ]; then
             cd bootable/recovery
             # Apply the patch using a relative path from bootable/recovery
-            git apply "../../$PATCH_TO_APPLY" > /dev/null 2>&1 || RET=$?
+            git apply "../../$PATCH_TO_APPLY" || RET=$?
             cd ../../ # Go back to android-recovery root
         fi
 
