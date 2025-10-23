@@ -156,57 +156,7 @@ jobs:
       run: |
         cd android-recovery
         source build/envsetup.sh
-        echo "Verifying patch application..."
-        
-        # 2. Manually apply the haptics patch
-
-        echo "Attempting to manually apply haptics patch..."
-
-        RET=0
-
-        # This is the path to your patch relative to the android-recovery root
-
-        TARGET_PATCH_FILE="device/transsion/mt6835-common/patches/0001-haptics-use-brightness-200ms.patch"
-
-        
-
-        if [ -f "$TARGET_PATCH_FILE" ]; then
-
-            cd bootable/recovery
-
-            # Apply the patch. We are NOT silencing output (no > /dev/null 2>&1)
-
-            # This lets us see the full error message from git apply.
-
-            git apply "../../$TARGET_PATCH_FILE" || RET=$?
-
-            cd ../../ # Go back to android-recovery root
-
-        else
-
-            echo "ERROR: Patch file not found at $TARGET_PATCH_FILE"
-
-            RET=1 # Set error code
-
-        fi
-
-
-
-        if [ $RET -ne 0 ]; then
-
-            echo "------------------------------------------------------------------"
-
-            echo "ERROR: Haptics patch failed to apply. See full error log above."
-
-            echo "The build will continue, but haptics will not work."
-
-            echo "------------------------------------------------------------------"
-
-        else
-
-            echo "OK: Haptics patch was applied successfully."
-
-        fi
+        ./device/transsion/mt6835-common/vendorsetup.sh
         export ALLOW_MISSING_DEPENDENCIES=true
         lunch ${{ env.DEVICE_MAKEFILE }}-eng && make clean && make ${{ github.event.inputs.BUILD_TARGET }}image -j$(nproc --all)
         echo "Done building your ${{ github.event.inputs.BUILD_TARGET }}.img"
