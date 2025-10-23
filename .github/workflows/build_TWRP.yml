@@ -158,54 +158,24 @@ jobs:
         source build/envsetup.sh
 
         
-        # 2. Manually apply the haptics patch
-
-        echo "Attempting to manually apply haptics patch..."
-
-        RET=0
-
-        # This is the path to your patch relative to the android-recovery root
-
-        TARGET_PATCH_FILE="device/transsion/mt6835-common/patches/0001-haptics-use-brightness-200ms.patch"
-
+        # 2. Force-replace events.cpp with our modified version
+        echo "Replacing stock events.cpp with modified version from patches..."
         
+        # Define paths
+        SOURCE_FILE="device/transsion/mt6835-common/patches/events.cpp"
+        DEST_FILE="bootable/recovery/minuitwrp/events.cpp"
 
-        if [ -f "$TARGET_PATCH_FILE" ]; then
-
-            cd bootable/recovery
-
-            # Apply the patch. We are NOT silencing output (no > /dev/null 2>&1)
-
-            # This lets us see the full error message from git apply.
-            git am --whitespace=fix ../../device/transsion/mt6835-common/patches/0001-haptics-use-brightness-200ms.patch
-            git apply "../../$TARGET_PATCH_FILE" || RET=$?
-
-            cd ../../ # Go back to android-recovery root
-
+        if [ -f "$SOURCE_FILE" ]; then
+            echo "Found modified events.cpp in patches folder."
+            rm -f "$DEST_FILE"
+            cp "$SOURCE_FILE" "$DEST_FILE"
+            echo "Successfully replaced events.cpp."
         else
-
-            echo "ERROR: Patch file not found at $TARGET_PATCH_FILE"
-
-            RET=1 # Set error code
-
-        fi
-
-
-
-        if [ $RET -ne 0 ]; then
-
             echo "------------------------------------------------------------------"
-
-            echo "ERROR: Haptics patch failed to apply. See full error log above."
-
-            echo "The build will continue, but haptics will not work."
-
+            echo "ERROR: Could not find $SOURCE_FILE"
+            echo "Make sure your modified events.cpp is in the patches/ folder."
             echo "------------------------------------------------------------------"
-
-        else
-
-            echo "OK: Haptics patch was applied successfully."
-
+            # We will let the build continue, but it will use the stock file
         fi
         
         export ALLOW_MISSING_DEPENDENCIES=true
