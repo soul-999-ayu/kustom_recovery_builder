@@ -1,4 +1,4 @@
-name: Build - TWRP
+name: Build - TWRP KL8h
 
 on:
   workflow_dispatch:
@@ -156,11 +156,7 @@ jobs:
       run: |
         cd android-recovery
         source build/envsetup.sh
-
-        
-        # 2. Force-replace events.cpp with our modified version
         echo "Replacing stock events.cpp with modified version from patches..."
-        
         # Define paths
         SOURCE_FILE="device/transsion/mt6835-common/patches/events.cpp"
         DEST_FILE="bootable/recovery/minuitwrp/events.cpp"
@@ -179,7 +175,7 @@ jobs:
         fi
         
         export ALLOW_MISSING_DEPENDENCIES=true
-        lunch ${{ env.DEVICE_MAKEFILE }}-eng && make clean && make ${{ github.event.inputs.BUILD_TARGET }}image -j$(nproc --all)
+        lunch ${{ env.DEVICE_MAKEFILE }}-user && make clean && make ${{ github.event.inputs.BUILD_TARGET }}image -j$(nproc --all)
         echo "Done building your ${{ github.event.inputs.BUILD_TARGET }}.img"
       continue-on-error: true
       
