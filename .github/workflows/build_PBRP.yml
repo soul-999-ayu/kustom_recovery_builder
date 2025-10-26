@@ -152,6 +152,25 @@ jobs:
       run: |
         cd android-recovery
         source build/envsetup.sh
+        # 2. Force-replace events.cpp with our modified version
+        echo "Replacing stock events.cpp with modified version from patches..."
+        
+        # Define paths
+        SOURCE_FILE="device/transsion/mt6835-common/patches/events.cpp"
+        DEST_FILE="bootable/recovery/minuitwrp/events.cpp"
+
+        if [ -f "$SOURCE_FILE" ]; then
+            echo "Found modified events.cpp in patches folder."
+            rm -f "$DEST_FILE"
+            cp "$SOURCE_FILE" "$DEST_FILE"
+            echo "Successfully replaced events.cpp."
+        else
+            echo "------------------------------------------------------------------"
+            echo "ERROR: Could not find $SOURCE_FILE"
+            echo "Make sure your modified events.cpp is in the patches/ folder."
+            echo "------------------------------------------------------------------"
+            # We will let the build continue, but it will use the stock file
+        fi
         export ALLOW_MISSING_DEPENDENCIES=true
         lunch ${{ env.DEVICE_MAKEFILE }}-eng && make clean && make ${{ github.event.inputs.BUILD_TARGET }}image -j$(nproc --all)
       continue-on-error: true
