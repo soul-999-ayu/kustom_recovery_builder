@@ -1,4 +1,4 @@
-name: Build - SHRP
+name: Build - SHRP KL8h
 
 on:
   workflow_dispatch:
@@ -14,19 +14,19 @@ on:
       DEVICE_TREE:
         description: 'Custom Recovery Tree' # Your already made Device Tree for TWRP
         required: true
-        default: 'https://github.com/naden01/'
+        default: 'https://github.com/soul-999-ayu/twrp-device_tecno_KL8h'
       DEVICE_TREE_BRANCH:
         description: 'Custom Recovery Tree Branch' # Your Device Tree Branch, make sure it's right.
         required: true
-        default: 'pb'
+        default: 'main'
       DEVICE_PATH:
         description: 'Specify your Device Path' # As is, just like your DEVICE_PATH in your BoardConfig.mk
         required: true
-        default: 'device/'
+        default: 'device/tecno/KL8h'
       DEVICE_NAME:
         description: 'Specify your Device Codename' # As is, just like your PRODUCT_DEVICE in your device tree.
         required: true
-        default: 'LH8n'
+        default: 'KL8h'
       BUILD_TARGET:
         description: 'Specify your Build Target' # Pick among boot, recovery and vendor_boot
         required: true
@@ -154,8 +154,26 @@ jobs:
       run: |
         cd android-recovery
         source build/envsetup.sh
+        echo "Replacing stock events.cpp with modified version from patches..."
+        
+        # Define paths
+        SOURCE_FILE="device/transsion/mt6835-common/patches/events.cpp"
+        DEST_FILE="bootable/recovery/minuitwrp/events.cpp"
+
+        if [ -f "$SOURCE_FILE" ]; then
+            echo "Found modified events.cpp in patches folder."
+            rm -f "$DEST_FILE"
+            cp "$SOURCE_FILE" "$DEST_FILE"
+            echo "Successfully replaced events.cpp."
+        else
+            echo "------------------------------------------------------------------"
+            echo "ERROR: Could not find $SOURCE_FILE"
+            echo "Make sure your modified events.cpp is in the patches/ folder."
+            echo "------------------------------------------------------------------"
+            # We will let the build continue, but it will use the stock file
+        fi
         export ALLOW_MISSING_DEPENDENCIES=true
-        lunch ${{ env.DEVICE_MAKEFILE }}-eng && make clean && make ${{ github.event.inputs.BUILD_TARGET }}image -j$(nproc --all)
+        lunch ${{ env.DEVICE_MAKEFILE }}-userdebug && make clean && make ${{ github.event.inputs.BUILD_TARGET }}image -j$(nproc --all)
         echo "Done building your ${{ github.event.inputs.BUILD_TARGET }}.img"
       continue-on-error: true
       
