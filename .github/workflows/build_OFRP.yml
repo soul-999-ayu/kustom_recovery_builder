@@ -1,4 +1,4 @@
-name: OrangeFox KL8h
+name: Build - OrangeFox KL8h
 
 on:
   workflow_dispatch:
