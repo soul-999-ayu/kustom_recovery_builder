@@ -1,4 +1,4 @@
-name: OrangeFox [OFRP]
+name: OrangeFox KL8h
 
 on:
   workflow_dispatch:
@@ -14,19 +14,19 @@ on:
       DEVICE_TREE:
         description: 'Custom Recovery Tree'
         required: true
-        default: 'https://github.com/naden01/lekno-LH8n'
+        default: 'https://github.com/soul-999-ayu/twrp-device_tecno_KL8h'
       DEVICE_TREE_BRANCH:
         description: 'Custom Recovery Tree Branch'
         required: true
-        default: 'android-14'
+        default: 'main'
       DEVICE_PATH:
         description: 'Specify your device path.'
         required: true
-        default: 'device/tecno/LH8n'
+        default: 'device/tecno/KL8h'
       DEVICE_NAME:
         description: 'Specify your Device Codename.'
         required: true
-        default: 'LH8n'
+        default: 'KL8h'
       BUILD_TARGET:
         description: 'Specify your Build Target'
         required: true
@@ -110,8 +110,6 @@ jobs:
         cd ${GITHUB_WORKSPACE}/OrangeFox/fox_${{ github.event.inputs.MANIFEST_BRANCH }}
         set +e
         source build/envsetup.sh
-
-        # 2. Force-replace events.cpp with our modified version
         echo "Replacing stock events.cpp with modified version from patches..."
         
         # Define paths
